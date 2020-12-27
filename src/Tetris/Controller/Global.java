@@ -24,6 +24,7 @@ public class Global {
             Scene scene = stage.getScene();
             stage.getScene().setRoot(page);
             stage.sizeToScene();
+            page.requestFocus();
         }
         catch (Exception e){
             e.printStackTrace();

@@ -9,6 +9,7 @@ import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
+import javafx.scene.input.KeyEvent;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -30,11 +31,21 @@ public class Play {
     Thread gameThread;
     GraphicsContext gc;
 
-    int level = 10;
-    final float accelerationFactor = 1;
+    int level = 1;
+    long speed = secondNano;
     long lastFall = 0;
 
+    void levelUp(){
+        level ++;
+        double temp = Math.pow((0.8 - ((level - 1) * 0.007)), level - 1);
+        speed = (long) (temp * secondNano);
+    }
+
     void startGame(){
+        level = 0;
+        levelUp();
+        lastFall = 0;
+
         board = new Board();
         shapeGenerator = new ShapeGenerator(board);
         currentShape = shapeGenerator.getShape();
@@ -63,6 +74,8 @@ public class Play {
                 }
 
             }.start();
+
+            gc.getCanvas().getParent().addEventFilter(KeyEvent.KEY_PRESSED, this::keyPressed);
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -70,7 +83,7 @@ public class Play {
 
     void tick(long time){
         lastFall += time;
-        if(lastFall > secondNano * accelerationFactor/ ((accelerationFactor - 1) + level)){
+        if(lastFall > speed){
             currentShape.moveDown();
             lastFall = 0;
             if(currentShape.ldY<-1){
@@ -80,6 +93,23 @@ public class Play {
         }
         showBoard(board, gc);
         showShape(currentShape, gc);
+    }
+
+    public void keyPressed(KeyEvent key){
+        switch (key.getCode()){
+            case UP:
+                currentShape = currentShape.rotateClock();
+                break;
+            case DOWN:
+                currentShape.moveDown();
+                lastFall = 0;
+                break;
+            case LEFT:
+                currentShape.moveLeft();
+                break;
+            case RIGHT:
+                currentShape.moveRight();
+        }
     }
 
     @FXML
@@ -110,6 +140,9 @@ public class Play {
         assert gb != null : "fx:id=\"gb\" was not injected: check your FXML file 'Play.fxml'.";
 
         gc = canvas.getGraphicsContext2D();
+
+        gc.getCanvas().getParent().requestFocus();
+
         gameThread = new Thread(this::startGame);
         gameThread.start();
     }

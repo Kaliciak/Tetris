@@ -25,6 +25,12 @@ public abstract class Shape {
         blocks[x][y] = new Block(board, ldX + x, ldY + y, false, color);
     }
 
+    //todo: rotating and moving
+
+    public Shape rotateClock(){
+        return getState(state + 1);
+    }
+
     public abstract Shape getState(int state);
 
     public void stateAssigns(int state, int ldX, int ldY){
@@ -38,6 +44,24 @@ public abstract class Shape {
         for(Block[] bl: blocks){
             for(Block block: bl){
                 block.y --;
+            }
+        }
+    }
+
+    public void moveLeft(){
+        ldX --;
+        for(Block[] bl: blocks){
+            for(Block block: bl){
+                block.x --;
+            }
+        }
+    }
+
+    public void moveRight(){
+        ldX ++;
+        for(Block[] bl: blocks){
+            for(Block block: bl){
+                block.x ++;
             }
         }
     }
