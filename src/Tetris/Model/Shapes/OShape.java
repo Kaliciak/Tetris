@@ -1,0 +1,44 @@
+package Tetris.Model.Shapes;
+
+import Tetris.Model.Block;
+import Tetris.Model.Board;
+import Tetris.Model.Shape;
+import javafx.scene.paint.Color;
+
+/*
+
+XX
+XX
+
+*/
+public class OShape extends Shape {
+
+    OShape(Board board){
+        super(board);
+        color = Color.rgb(249,250,26);
+        blocks = new Block[2][2];
+        ldX = 4;
+        ldY = 20;
+    }
+
+    public OShape(Board board, int state) {
+        this(board);
+        state %= 4;
+        this.state = state;
+        this.blocks = getState(state).blocks;
+    }
+
+    @Override
+    public Shape getState(int state) {
+        Shape result = new OShape(board);
+        state %= 4;
+        result.stateAssigns(state, ldX, ldY);
+        for(int i = 0; i < 2; i ++){
+            for(int j = 0; j < 2; j ++){
+                result.addBlock(i, j);
+            }
+        }
+        return result;
+    }
+
+}

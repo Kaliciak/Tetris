@@ -4,9 +4,9 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="650.0" prefWidth="500.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controller.MainMenu">
+<AnchorPane prefHeight="650.0" prefWidth="500.0" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" fx:controller="Tetris.Controller.MainMenu">
    <children>
-      <Button fx:id="but" layoutX="158.0" layoutY="127.0" mnemonicParsing="false" onAction="#butt" prefHeight="165.0" prefWidth="238.0" text="Button">
+      <Button fx:id="Play" layoutX="79.0" layoutY="130.0" mnemonicParsing="false" onAction="#play" prefHeight="99.0" prefWidth="298.0" text="PLAY" textAlignment="CENTER" AnchorPane.leftAnchor="76.0" AnchorPane.rightAnchor="76.0">
          <font>
             <Font size="46.0" />
          </font>
