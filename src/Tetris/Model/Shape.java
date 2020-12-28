@@ -25,12 +25,105 @@ public abstract class Shape {
         blocks[x][y] = new Block(board, ldX + x, ldY + y, false, color);
     }
 
+    public static int normState(int state){
+        state %= 4;
+        state += 4;
+        state %= 4;
+        return state;
+    }
+
+    public boolean checkPositions(int from, int to){
+        Shape test = getState(state);
+
+        // 0>>1
+        if(from == 0 && to == 1){
+            if(test.moveByVector(0, 0) || test.moveByVector(-1, 0) || test.moveByVector(-1, 1) ||
+                    test.moveByVector(0, -2) || test.moveByVector(-1, -2)){
+                changeToShape(test);
+                return true;
+            }
+        }
+
+        // 1>>0
+        else if(from == 1 && to == 0){
+            if(test.moveByVector(0, 0) || test.moveByVector(1, 0) || test.moveByVector(1, -1) ||
+                    test.moveByVector(0, 2) || test.moveByVector(1, 2)){
+                changeToShape(test);
+                return true;
+            }
+        }
+
+        // 1>>2
+        else if(from == 1 && to == 2){
+            if(test.moveByVector(0, 0) || test.moveByVector(1, 0) || test.moveByVector(1, -1) ||
+                    test.moveByVector(0, 2) || test.moveByVector(1, 2)){
+                changeToShape(test);
+                return true;
+            }
+        }
+
+        // 2>>1
+        else if(from == 2 && to == 1){
+            if(test.moveByVector(0, 0) || test.moveByVector(-1, 0) || test.moveByVector(-1, 1) ||
+                    test.moveByVector(0, -2) || test.moveByVector(-1, -2)){
+                changeToShape(test);
+                return true;
+            }
+        }
+
+        // 2>>3
+        else if(from == 2 && to == 3){
+            if(test.moveByVector(0, 0) || test.moveByVector(1, 0) || test.moveByVector(1, 1) ||
+                    test.moveByVector(0, -2) || test.moveByVector(1, -2)){
+                changeToShape(test);
+                return true;
+            }
+        }
+
+        // 3>>2
+        else if(from == 3 && to == 2){
+            if(test.moveByVector(0, 0) || test.moveByVector(-1, 0) || test.moveByVector(-1, -1) ||
+                    test.moveByVector(0, 2) || test.moveByVector(-1, 2)){
+                changeToShape(test);
+                return true;
+            }
+        }
+
+        // 3>>0
+        else if(from == 3 && to == 0){
+            if(test.moveByVector(0, 0) || test.moveByVector(-1, 0) || test.moveByVector(-1, -1) ||
+                    test.moveByVector(0, 2) || test.moveByVector(-1, 2)){
+                changeToShape(test);
+                return true;
+            }
+        }
+
+        // 0>>3
+        else if(from == 0 && to == 3){
+            if(test.moveByVector(0, 0) || test.moveByVector(1, 0) || test.moveByVector(1, 1) ||
+                    test.moveByVector(0, -2) || test.moveByVector(1, -2)){
+                changeToShape(test);
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     // rotate clockwise
     public boolean rotateClock(){
-        //todo: 5 positions
         Shape result = getState(state + 1);
-        if(result.isProper()){
+        if(result.checkPositions(state, result.state)){
+            changeToShape(result);
+            return true;
+        }
+        return false;
+    }
+
+    // rotate counter clockwise
+    public boolean rotateCounterClock(){
+        Shape result = getState(state - 1);
+        if(result.checkPositions(state, result.state)){
             changeToShape(result);
             return true;
         }
@@ -105,5 +198,11 @@ public abstract class Shape {
             return true;
         }
         return false;
+    }
+
+    public Shape getGhost(){
+        Shape result = getState(state);
+        while(result.moveByVector(0, -1)){}
+        return result;
     }
 }

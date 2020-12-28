@@ -26,32 +26,42 @@ public class Play {
     ShapeGenerator shapeGenerator;
     Shape currentShape;
     Shape nextShape;
+    Shape ghostShape;
+    Shape holdShape;
 
     volatile boolean stop = false;
     Thread gameThread;
     GraphicsContext gc;
     GraphicsContext nextGc;
+    GraphicsContext holdGc;
     boolean begun = false;
+    boolean changed = false;
 
     int level = 1;
     long speed = secondNano;
     long lastFall = 0;
     long score = 0;
+    int lines = 0;
 
     void startGame(){
         stop = false;
+        changed = false;
+        holdShape = null;
         level = 0;
         levelUp();
         lastFall = 0;
         score = 0;
+        lines = 0;
 
         board = new Board();
         shapeGenerator = new ShapeGenerator(board);
         currentShape = shapeGenerator.getShape();
+        ghostShape = currentShape.getGhost();
         nextShape = shapeGenerator.getShape();
 
         levelText.setText(String.valueOf(level));
         scoreText.setText(String.valueOf(score));
+        linesText.setText(String.valueOf(lines));
 
         if(!begun){
             try {
@@ -91,31 +101,56 @@ public class Play {
         lastFall += time;
         if(lastFall > speed){
             if(!currentShape.moveByVector(0, -1)){
-                putShape();
+                putShape(currentShape);
             }
             lastFall = 0;
         }
         showBoard(board, gc);
+        showGhost(ghostShape, gc);
         showShape(currentShape, gc);
         showNext(nextShape, nextGc);
+        showNext(holdShape, holdGc);
     }
 
     public void keyPressed(KeyEvent key){
         switch (key.getCode()){
             case UP:
+            case X:
                 currentShape.rotateClock();
+                ghostShape = currentShape.getGhost();
+                break;
+            case Z:
+                currentShape.rotateCounterClock();
+                ghostShape = currentShape.getGhost();
+                break;
+            case C:
+                if(!changed){
+                    currentShape = hold(currentShape);
+                    if(currentShape == null){
+                        getNewShape();
+                    }
+                    else {
+                        ghostShape = currentShape.getGhost();
+                    }
+                    changed = true;
+                }
                 break;
             case DOWN:
                 if(!currentShape.moveByVector(0, -1)){
-                    putShape();
+                    putShape(currentShape);
                 }
                 lastFall = 0;
                 break;
             case LEFT:
                 currentShape.moveByVector(-1, 0);
+                ghostShape = currentShape.getGhost();
                 break;
             case RIGHT:
                 currentShape.moveByVector(1, 0);
+                ghostShape = currentShape.getGhost();
+                break;
+            case SPACE:
+                putShape(ghostShape);
         }
     }
 
@@ -128,18 +163,28 @@ public class Play {
         }
     }
 
-    void putShape(){
-        board.putShape(currentShape);
-        lastFall = 0;
-        if(currentShape.isAbove()){
+    void putShape(Shape shape){
+        board.putShape(shape);
+        if(shape.isAbove()){
             startGame();
             return;
         }
-        currentShape = nextShape;
-        nextShape = shapeGenerator.getShape();
-        score += board.clearLines();
+
+        int clearedLines = board.clearLines();
+        lines += clearedLines;
+        score += clearedLines * 100 * level;
+        getNewShape();
 
         scoreText.setText(String.valueOf(score));
+        linesText.setText(String.valueOf(lines));
+    }
+
+    void getNewShape(){
+        currentShape = nextShape;
+        ghostShape = currentShape.getGhost();
+        nextShape = shapeGenerator.getShape();
+        lastFall = 0;
+        changed = false;
     }
 
     void levelUp(){
@@ -147,6 +192,16 @@ public class Play {
         double temp = Math.pow((0.8 - ((level - 1) * 0.007)), level - 1);
         speed = (long) (temp * secondNano);
         levelText.setText(String.valueOf(level));
+    }
+
+    Shape hold(Shape shape){
+        Shape result = holdShape;
+        try {
+            holdShape = shape.getClass().getConstructor(Board.class, int.class).newInstance(board, 0);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return result;
     }
 
     @FXML
@@ -165,10 +220,16 @@ public class Play {
     private Canvas nextCanvas;
 
     @FXML
+    private Canvas holdCanvas;
+
+    @FXML
     private Text scoreText;
 
     @FXML
     private Text levelText;
+
+    @FXML
+    private Text linesText;
 
     @FXML
     void goBack(ActionEvent event) {
@@ -182,6 +243,7 @@ public class Play {
 
         gc = canvas.getGraphicsContext2D();
         nextGc = nextCanvas.getGraphicsContext2D();
+        holdGc = holdCanvas.getGraphicsContext2D();
 
         gc.getCanvas().getParent().requestFocus();
 

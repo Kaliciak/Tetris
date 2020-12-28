@@ -31,11 +31,37 @@ public class Show {
         gc.fillRect(block.x * width, gc.getCanvas().getHeight() - (block.y + 1) * height, width - 1, height - 1);
     }
 
+    public static void showGhostBlock(Block block, GraphicsContext gc){
+        double width = gc.getCanvas().getWidth() / block.board.numberOfColumns;
+        double height = gc.getCanvas().getHeight() / block.board.numberOfVisibleRows;
+        if(block.empty){
+            gc.setFill(Color.BLACK);
+        }
+        else{
+            gc.setFill(block.color);
+        }
+        gc.fillRect(block.x * width, gc.getCanvas().getHeight() - (block.y + 1) * height, width - 1, height - 1);
+        gc.setFill(Color.BLACK);
+        gc.fillRect(block.x * width + 2, gc.getCanvas().getHeight() - (block.y + 1) * height + 2, width - 5, height - 5);
+        gc.setFill(new Color(block.color.getRed(), block.color.getGreen(), block.color.getBlue(), 0.5));
+        gc.fillRect(block.x * width + 2, gc.getCanvas().getHeight() - (block.y + 1) * height + 2, width - 5, height - 5);
+    }
+
     public static void showShape(Shape shape, GraphicsContext gc){
         for(Block[] bl: shape.blocks){
             for(Block block: bl){
                 if(!block.empty){
                     showBlock(block, gc);
+                }
+            }
+        }
+    }
+
+    public static void showGhost(Shape shape, GraphicsContext gc){
+        for(Block[] bl: shape.blocks){
+            for(Block block: bl){
+                if(!block.empty){
+                    showGhostBlock(block, gc);
                 }
             }
         }
@@ -50,7 +76,7 @@ public class Show {
         for(int i = 0; i < 4 ; i ++){
             for(int j = 0; j < 4; j ++){
                 try {
-                    if(shape.blocks[i][j].empty){
+                    if(shape != null && shape.blocks[i][j].empty){
                         gc.setFill(Color.BLACK);
                     }
                     else {

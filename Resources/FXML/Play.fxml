@@ -14,28 +14,44 @@
             <Font size="10.0" />
          </font>
       </Button>
-      <Text layoutX="26.0" layoutY="204.0" strokeType="OUTSIDE" strokeWidth="0.0" text="SCORE:" wrappingWidth="108.53669738769531" AnchorPane.leftAnchor="20.0">
+      <Text layoutX="20.0" layoutY="334.0" strokeType="OUTSIDE" strokeWidth="0.0" text="SCORE:" wrappingWidth="108.53669738769531" AnchorPane.leftAnchor="20.0">
          <font>
             <Font size="20.0" />
          </font>
       </Text>
-      <Text fx:id="scoreText" layoutX="26.0" layoutY="231.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Text" wrappingWidth="143.29450225830078" AnchorPane.leftAnchor="20.0">
+      <Text fx:id="scoreText" layoutX="20.0" layoutY="361.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Text" wrappingWidth="143.29450225830078" AnchorPane.leftAnchor="20.0">
          <font>
             <Font size="20.0" />
          </font>
       </Text>
-      <Text layoutX="26.0" layoutY="290.0" strokeType="OUTSIDE" strokeWidth="0.0" text="LEVEL:" wrappingWidth="108.53669738769531" AnchorPane.leftAnchor="20.0">
+      <Text layoutX="20.0" layoutY="420.0" strokeType="OUTSIDE" strokeWidth="0.0" text="LEVEL:" wrappingWidth="108.53669738769531" AnchorPane.leftAnchor="20.0">
          <font>
             <Font size="20.0" />
          </font>
       </Text>
-      <Text fx:id="levelText" layoutX="26.0" layoutY="317.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Text" wrappingWidth="143.29450225830078" AnchorPane.leftAnchor="20.0">
+      <Text fx:id="levelText" layoutX="20.0" layoutY="447.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Text" wrappingWidth="143.29450225830078" AnchorPane.leftAnchor="20.0">
          <font>
             <Font size="20.0" />
          </font>
       </Text>
       <Canvas fx:id="nextCanvas" height="80.0" layoutX="26.0" layoutY="92.0" width="80.0" AnchorPane.leftAnchor="20.0" />
       <Text layoutX="26.0" layoutY="78.0" strokeType="OUTSIDE" strokeWidth="0.0" text="NEXT:" wrappingWidth="108.53669738769531" AnchorPane.leftAnchor="20.0">
+         <font>
+            <Font size="20.0" />
+         </font>
+      </Text>
+      <Canvas fx:id="holdCanvas" height="80.0" layoutX="20.0" layoutY="218.0" width="80.0" AnchorPane.leftAnchor="20.0" />
+      <Text layoutX="20.0" layoutY="204.0" strokeType="OUTSIDE" strokeWidth="0.0" text="HOLD:" wrappingWidth="108.53669738769531" AnchorPane.leftAnchor="20.0">
+         <font>
+            <Font size="20.0" />
+         </font>
+      </Text>
+      <Text layoutX="20.0" layoutY="497.0" strokeType="OUTSIDE" strokeWidth="0.0" text="LINES:" wrappingWidth="108.53669738769531" AnchorPane.leftAnchor="20.0">
+         <font>
+            <Font size="20.0" />
+         </font>
+      </Text>
+      <Text fx:id="linesText" layoutX="20.0" layoutY="524.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Text" wrappingWidth="143.29450225830078" AnchorPane.leftAnchor="20.0">
          <font>
             <Font size="20.0" />
          </font>

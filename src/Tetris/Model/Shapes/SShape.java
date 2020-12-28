@@ -24,15 +24,14 @@ public class SShape extends Shape {
 
     public SShape(Board board, int state) {
         this(board);
-        state %= 4;
-        this.state = state;
+        this.state = normState(state);
         this.blocks = getState(state).blocks;
     }
 
     @Override
     public Shape getState(int state) {
         Shape result = new SShape(board);
-        state %= 4;
+        state = normState(state);
         result.stateAssigns(state, ldX, ldY);
         for(int i = 0; i < 3; i ++){
             for(int j = 0; j < 3; j ++){

@@ -23,15 +23,14 @@ public class IShape extends Shape {
 
     public IShape(Board board, int state) {
         this(board);
-        state %= 4;
-        this.state = state;
+        this.state = normState(state);
         this.blocks = getState(state).blocks;
     }
 
     @Override
     public Shape getState(int state) {
         Shape result = new IShape(board);
-        state %= 4;
+        state = normState(state);
         result.stateAssigns(state, ldX, ldY);
         for(int i = 0; i < 4; i ++){
             for(int j = 0; j < 4; j ++){
@@ -65,5 +64,84 @@ public class IShape extends Shape {
                 return result;
         }
         return null;
+    }
+
+    @Override
+    public boolean checkPositions(int from, int to) {
+        Shape test = getState(state);
+
+        // 0>>1
+        if(from == 0 && to == 1){
+            if(test.moveByVector(0, 0) || test.moveByVector(-2, 0) || test.moveByVector(1, 0) ||
+                    test.moveByVector(-2, -1) || test.moveByVector(1, 2)){
+                changeToShape(test);
+                return true;
+            }
+        }
+
+        // 1>>0
+        else if(from == 1 && to == 0){
+            if(test.moveByVector(0, 0) || test.moveByVector(2, 0) || test.moveByVector(-1, 0) ||
+                    test.moveByVector(2, 1) || test.moveByVector(-1, -2)){
+                changeToShape(test);
+                return true;
+            }
+        }
+
+        // 1>>2
+        else if(from == 1 && to == 2){
+            if(test.moveByVector(0, 0) || test.moveByVector(-1, 0) || test.moveByVector(2, 0) ||
+                    test.moveByVector(-1, 2) || test.moveByVector(2, -1)){
+                changeToShape(test);
+                return true;
+            }
+        }
+
+        // 2>>1
+        else if(from == 2 && to == 1){
+            if(test.moveByVector(0, 0) || test.moveByVector(1, 0) || test.moveByVector(-2, 0) ||
+                    test.moveByVector(1, -2) || test.moveByVector(-2, 1)){
+                changeToShape(test);
+                return true;
+            }
+        }
+
+        // 2>>3
+        else if(from == 2 && to == 3){
+            if(test.moveByVector(0, 0) || test.moveByVector(2, 0) || test.moveByVector(-1, 0) ||
+                    test.moveByVector(2, 1) || test.moveByVector(-1, -2)){
+                changeToShape(test);
+                return true;
+            }
+        }
+
+        // 3>>2
+        else if(from == 3 && to == 2){
+            if(test.moveByVector(0, 0) || test.moveByVector(-2, 0) || test.moveByVector(1, 0) ||
+                    test.moveByVector(-2, -1) || test.moveByVector(1, 2)){
+                changeToShape(test);
+                return true;
+            }
+        }
+
+        // 3>>0
+        else if(from == 3 && to == 0){
+            if(test.moveByVector(0, 0) || test.moveByVector(1, 0) || test.moveByVector(-2, 0) ||
+                    test.moveByVector(1, -2) || test.moveByVector(-2, 1)){
+                changeToShape(test);
+                return true;
+            }
+        }
+
+        // 0>>3
+        else if(from == 0 && to == 3){
+            if(test.moveByVector(0, 0) || test.moveByVector(-1, 0) || test.moveByVector(2, 0) ||
+                    test.moveByVector(-1, 2) || test.moveByVector(2, -1)){
+                changeToShape(test);
+                return true;
+            }
+        }
+
+        return false;
     }
 }

@@ -23,15 +23,14 @@ public class OShape extends Shape {
 
     public OShape(Board board, int state) {
         this(board);
-        state %= 4;
-        this.state = state;
+        this.state = normState(state);
         this.blocks = getState(state).blocks;
     }
 
     @Override
     public Shape getState(int state) {
         Shape result = new OShape(board);
-        state %= 4;
+        state = normState(state);
         result.stateAssigns(state, ldX, ldY);
         for(int i = 0; i < 3; i ++){
             for(int j = 0; j < 3; j ++){
@@ -46,4 +45,8 @@ public class OShape extends Shape {
         return result;
     }
 
+    @Override
+    public boolean checkPositions(int from, int to) {
+        return isProper();
+    }
 }
