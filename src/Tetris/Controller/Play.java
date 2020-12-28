@@ -19,6 +19,7 @@ import static Tetris.Controller.Global.replaceSceneContent;
 import static Tetris.Controller.Global.secondNano;
 import static Tetris.View.Show.*;
 
+//todo: lock delay
 
 public class Play {
 
@@ -172,7 +173,23 @@ public class Play {
 
         int clearedLines = board.clearLines();
         lines += clearedLines;
-        score += clearedLines * 100 * level;
+        switch (clearedLines){
+            case 1:
+                score += 100 * level;
+                break;
+            case 2:
+                score += 300 * level;
+                break;
+            case 3:
+                score += 500 * level;
+                break;
+            case 4:
+                score += 800 * level;
+                break;
+        }
+        if(lines >= 10*level){
+            levelUp();
+        }
         getNewShape();
 
         scoreText.setText(String.valueOf(score));
