@@ -17,5 +17,10 @@
             <Font name="Corbel" size="85.0" />
          </font>
       </Text>
+      <Button fx:id="Exit" layoutX="76.0" layoutY="385.0" mnemonicParsing="false" onAction="#exitGame" prefHeight="99.0" prefWidth="298.0" text="EXIT" textAlignment="CENTER" AnchorPane.leftAnchor="76.0" AnchorPane.rightAnchor="76.0">
+         <font>
+            <Font size="46.0" />
+         </font>
+      </Button>
    </children>
 </AnchorPane>

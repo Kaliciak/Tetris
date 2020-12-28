@@ -16,7 +16,7 @@ public class OShape extends Shape {
     OShape(Board board){
         super(board);
         color = Color.rgb(249,250,26);
-        blocks = new Block[2][2];
+        blocks = new Block[3][3];
         ldX = 4;
         ldY = 20;
     }
@@ -33,8 +33,13 @@ public class OShape extends Shape {
         Shape result = new OShape(board);
         state %= 4;
         result.stateAssigns(state, ldX, ldY);
-        for(int i = 0; i < 2; i ++){
-            for(int j = 0; j < 2; j ++){
+        for(int i = 0; i < 3; i ++){
+            for(int j = 0; j < 3; j ++){
+                result.blocks[i][j] = new Block(board, ldX + i,  ldY + j);
+            }
+        }
+        for(int i = 1; i < 3; i ++){
+            for(int j = 1; j < 3; j ++){
                 result.addBlock(i, j);
             }
         }

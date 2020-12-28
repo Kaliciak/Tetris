@@ -21,6 +21,14 @@ public class MainMenu {
     private Button Play;
 
     @FXML
+    private Button Exit;
+
+    @FXML
+    void exitGame(ActionEvent event) {
+        stage.close();
+    }
+
+    @FXML
     void play(ActionEvent event) {
         replaceSceneContent("/FXML/Play.fxml");
     }

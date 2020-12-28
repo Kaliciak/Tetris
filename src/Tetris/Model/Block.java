@@ -6,7 +6,7 @@ public class Block {
     public boolean empty = true;
     public Color color = new Color(0,0,0,1);
     public int x, y;
-    Board board;
+    public Board board;
 
     public Block(Board board, int x, int y){
         this.board = board;
@@ -21,4 +21,12 @@ public class Block {
         this.empty = empty;
         this.color = color;
     }
+
+    public void moveTo(Block block){
+        block.empty = this.empty;
+        block.color = this.color;
+
+        this.empty = true;
+    }
+
 }

@@ -25,10 +25,16 @@ public abstract class Shape {
         blocks[x][y] = new Block(board, ldX + x, ldY + y, false, color);
     }
 
-    //todo: rotating and moving
 
-    public Shape rotateClock(){
-        return getState(state + 1);
+    // rotate clockwise
+    public boolean rotateClock(){
+        //todo: 5 positions
+        Shape result = getState(state + 1);
+        if(result.isProper()){
+            changeToShape(result);
+            return true;
+        }
+        return false;
     }
 
     public abstract Shape getState(int state);
@@ -39,30 +45,65 @@ public abstract class Shape {
         this.ldY = ldY;
     }
 
-    public void moveDown(){
-        ldY --;
-        for(Block[] bl: blocks){
-            for(Block block: bl){
-                block.y --;
-            }
-        }
+    public void changeToShape(Shape shape){
+        color = shape.color;
+        blocks = shape.blocks;
+        state = shape.state;
+        ldX = shape.ldX;
+        ldY = shape.ldY;
     }
 
-    public void moveLeft(){
-        ldX --;
+    public boolean isAbove(){
         for(Block[] bl: blocks){
             for(Block block: bl){
-                block.x --;
+                if(!block.empty){
+                    // if above upper line
+                    if(block.y >= board.numberOfVisibleRows){
+                        return true;
+                    }
+                }
             }
         }
+        return false;
     }
 
-    public void moveRight(){
-        ldX ++;
+    public boolean isProper(){
         for(Block[] bl: blocks){
             for(Block block: bl){
-                block.x ++;
+                if(!block.empty){
+                    // if crosses left or right border
+                    if(block.x < 0 || block.x >= board.numberOfColumns){
+                        return false;
+                    }
+                    // if below bottom line
+                    if(block.y < 0){
+                        return false;
+                    }
+                    // if there is already block
+                    if(!board.blocks[block.x][block.y].empty){
+                        return false;
+                    }
+                }
             }
         }
+        return true;
+    }
+
+    public boolean moveByVector(int x, int y){
+        Shape result = getState(state);
+        result.ldX += x;
+        result.ldY += y;
+        for(Block[] bl: result.blocks){
+            for(Block block: bl){
+                block.x += x;
+                block.y += y;
+            }
+        }
+
+        if(result.isProper()){
+            changeToShape(result);
+            return true;
+        }
+        return false;
     }
 }

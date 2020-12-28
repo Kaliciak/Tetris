@@ -10,9 +10,6 @@ import Tetris.Game;
 
 
 public class Global {
-    public static final int numberOfRows = 24;
-    public static final int numberOfVisibleRows = 20;
-    public static final int numberOfColumns = 10;
     public static final long secondNano = 1000000000;
 
     public static Stage stage;
