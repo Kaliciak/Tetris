@@ -1,6 +1,6 @@
 # Tetris
 Project for Java classes.
-#Controls
+# Controls
 up, x - rotate clockwise\
 z - rotate counterclockwise\
 left - move left\
