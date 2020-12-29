@@ -10,8 +10,11 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 import javafx.scene.text.Text;
 
+import java.io.File;
 import java.net.URL;
 import java.util.ResourceBundle;
 
@@ -28,6 +31,12 @@ public class Play {
     Shape nextShape;
     Shape ghostShape;
     Shape holdShape;
+
+    MediaPlayer player;
+    MediaPlayer fall;
+    Media fallMedia;
+    MediaPlayer clearLineMP;
+    Media clearLineMedia;
 
     volatile boolean stop = false;
     Thread gameThread;
@@ -167,6 +176,7 @@ public class Play {
             case SPACE:
                 addToScore((currentShape.ldY - ghostShape.ldY) * 2 * level);
                 putShape(ghostShape);
+                break;
         }
     }
 
@@ -180,6 +190,9 @@ public class Play {
     }
 
     void putShape(Shape shape){
+        fall = new MediaPlayer(fallMedia);
+        fall.play();
+
         board.putShape(shape);
         if(shape.isAbove()){
             startGame();
@@ -187,23 +200,29 @@ public class Play {
         }
 
         int clearedLines = board.clearLines();
-        addToLines(clearedLines);
-        switch (clearedLines){
-            case 1:
-                addToScore(100 * level);
-                break;
-            case 2:
-                addToScore(300 * level);
-                break;
-            case 3:
-                addToScore(500 * level);
-                break;
-            case 4:
-                addToScore(800 * level);
-                break;
-        }
-        if(lines >= 10*level){
-            levelUp();
+        if(clearedLines > 0){
+            addToLines(clearedLines);
+            switch (clearedLines){
+                case 1:
+                    addToScore(100 * level);
+                    break;
+                case 2:
+                    addToScore(300 * level);
+                    break;
+                case 3:
+                    addToScore(500 * level);
+                    break;
+                case 4:
+                    addToScore(800 * level);
+                    break;
+            }
+            if(lines >= 10*level){
+                levelUp();
+            }
+
+            clearLineMP = new MediaPlayer(clearLineMedia);
+            clearLineMP.setVolume(2);
+            clearLineMP.play();
         }
         getNewShape();
         lockDelay = 0;
@@ -274,6 +293,7 @@ public class Play {
     @FXML
     void goBack(ActionEvent event) {
         endGame();
+        player.stop();
         replaceSceneContent("/FXML/MainMenu.fxml");
     }
 
@@ -289,5 +309,13 @@ public class Play {
 
         gameThread = new Thread(this::startGame);
         gameThread.start();
+
+        Media media = new Media(new File("Resources/Sound/Theme.mp3").toURI().toString());
+        player = new MediaPlayer(media);
+        player.setCycleCount(MediaPlayer.INDEFINITE);
+        player.play();
+
+        fallMedia = new Media(new File("Resources/Sound/Fall.mp3").toURI().toString());
+        clearLineMedia = new Media(new File("Resources/Sound/ClearLine.mp3").toURI().toString());
     }
 }

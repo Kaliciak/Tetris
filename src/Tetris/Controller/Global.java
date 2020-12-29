@@ -15,7 +15,7 @@ public class Global {
     public static Stage stage;
 
     public static void replaceSceneContent(String fxml){
-        System.out.println(fxml);
+//        System.out.println(fxml);
         try {
             Parent page = (Parent) FXMLLoader.load(Game.class.getResource(fxml), null, new JavaFXBuilderFactory());
             Scene scene = stage.getScene();
