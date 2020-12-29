@@ -1,0 +1,17 @@
+.root {
+     -fx-background-image: url("file:Resources/Images/MainBackground.png");
+}
+
+.button {
+    -fx-text-fill: white;
+    -fx-font-family: "Arial Narrow";
+    -fx-font-weight: bold;
+    -fx-background-image: url("file:Resources/Images/PlayBackground.png");
+}
+
+.button:hover {
+    -fx-text-fill: white;
+    -fx-font-family: "Arial Narrow";
+    -fx-font-weight: bold;
+    -fx-font-size: 47
+}
