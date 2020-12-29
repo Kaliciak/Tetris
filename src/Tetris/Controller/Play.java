@@ -19,7 +19,6 @@ import static Tetris.Controller.Global.replaceSceneContent;
 import static Tetris.Controller.Global.secondNano;
 import static Tetris.View.Show.*;
 
-//todo: lock delay
 
 public class Play {
 
@@ -41,6 +40,7 @@ public class Play {
     int level = 1;
     long speed = secondNano;
     long lastFall = 0;
+    long lockDelay = 0;
     long score = 0;
     int lines = 0;
 
@@ -51,6 +51,7 @@ public class Play {
         level = 0;
         levelUp();
         lastFall = 0;
+        lockDelay = 0;
         score = 0;
         lines = 0;
 
@@ -99,12 +100,22 @@ public class Play {
     }
 
     void tick(long time){
+        boolean zero = true;
+
         lastFall += time;
         if(lastFall > speed){
             if(!currentShape.moveByVector(0, -1)){
-                putShape(currentShape);
+                lockDelay += time;
+                if(lockDelay > secondNano/2){
+                    putShape(currentShape);
+                }
+                else{
+                    zero = false;
+                }
             }
-            lastFall = 0;
+            if(zero){
+                lastFall = 0;
+            }
         }
         showBoard(board, gc);
         showGhost(ghostShape, gc);
@@ -140,6 +151,9 @@ public class Play {
                 if(!currentShape.moveByVector(0, -1)){
                     putShape(currentShape);
                 }
+                else{
+                    addToScore(level);
+                }
                 lastFall = 0;
                 break;
             case LEFT:
@@ -151,6 +165,7 @@ public class Play {
                 ghostShape = currentShape.getGhost();
                 break;
             case SPACE:
+                addToScore((currentShape.ldY - ghostShape.ldY) * 2 * level);
                 putShape(ghostShape);
         }
     }
@@ -172,28 +187,26 @@ public class Play {
         }
 
         int clearedLines = board.clearLines();
-        lines += clearedLines;
+        addToLines(clearedLines);
         switch (clearedLines){
             case 1:
-                score += 100 * level;
+                addToScore(100 * level);
                 break;
             case 2:
-                score += 300 * level;
+                addToScore(300 * level);
                 break;
             case 3:
-                score += 500 * level;
+                addToScore(500 * level);
                 break;
             case 4:
-                score += 800 * level;
+                addToScore(800 * level);
                 break;
         }
         if(lines >= 10*level){
             levelUp();
         }
         getNewShape();
-
-        scoreText.setText(String.valueOf(score));
-        linesText.setText(String.valueOf(lines));
+        lockDelay = 0;
     }
 
     void getNewShape(){
@@ -219,6 +232,16 @@ public class Play {
             e.printStackTrace();
         }
         return result;
+    }
+
+    void addToScore(int x){
+        score += x;
+        scoreText.setText(String.valueOf(score));
+    }
+
+    void addToLines(int x){
+        lines += x;
+        linesText.setText(String.valueOf(lines));
     }
 
     @FXML
