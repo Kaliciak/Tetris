@@ -9,9 +9,13 @@ import javafx.fxml.FXML;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 
 import java.io.File;
@@ -45,6 +49,9 @@ public class Play {
     GraphicsContext holdGc;
     boolean begun = false;
     boolean changed = false;
+    boolean paused = false;
+
+    AnimationTimer animationTimer;
 
     int level = 1;
     long speed = secondNano;
@@ -56,6 +63,7 @@ public class Play {
     void startGame(){
         stop = false;
         changed = false;
+        paused = false;
         holdShape = null;
         level = 0;
         levelUp();
@@ -76,7 +84,7 @@ public class Play {
 
         if(!begun){
             try {
-                new AnimationTimer() {
+                animationTimer = new AnimationTimer() {
                     long lastTick = 0;
 
                     public void handle(long now) {
@@ -97,14 +105,17 @@ public class Play {
                         }
                     }
 
-                }.start();
+                };
+                animationTimer.start();
                 gc.getCanvas().getParent().addEventFilter(KeyEvent.KEY_PRESSED, this::keyPressed);
 
                 begun = true;
             }catch (Exception e){
                 e.printStackTrace();
             }
-
+        }
+        else{
+            animationTimer.start();
         }
     }
 
@@ -126,57 +137,88 @@ public class Play {
                 lastFall = 0;
             }
         }
-        showBoard(board, gc);
-        showGhost(ghostShape, gc);
-        showShape(currentShape, gc);
-        showNext(nextShape, nextGc);
-        showNext(holdShape, holdGc);
+
+        if(!stop){
+            showBoard(board, gc);
+            showGhost(ghostShape, gc);
+            showShape(currentShape, gc);
+            showNext(nextShape, nextGc);
+            showNext(holdShape, holdGc);
+        }
     }
 
     public void keyPressed(KeyEvent key){
-        switch (key.getCode()){
-            case UP:
-            case X:
-                currentShape.rotateClock();
-                ghostShape = currentShape.getGhost();
-                break;
-            case Z:
-                currentShape.rotateCounterClock();
-                ghostShape = currentShape.getGhost();
-                break;
-            case C:
-                if(!changed){
-                    currentShape = hold(currentShape);
-                    if(currentShape == null){
-                        getNewShape();
+        if(!paused){
+            switch (key.getCode()){
+                case UP:
+                case X:
+                    currentShape.rotateClock();
+                    ghostShape = currentShape.getGhost();
+                    break;
+                case Z:
+                    currentShape.rotateCounterClock();
+                    ghostShape = currentShape.getGhost();
+                    break;
+                case C:
+                    if(!changed){
+                        currentShape = hold(currentShape);
+                        if(currentShape == null){
+                            getNewShape();
+                        }
+                        else {
+                            ghostShape = currentShape.getGhost();
+                        }
+                        changed = true;
                     }
-                    else {
-                        ghostShape = currentShape.getGhost();
+                    break;
+                case DOWN:
+                    if(!currentShape.moveByVector(0, -1)){
+                        putShape(currentShape);
                     }
-                    changed = true;
-                }
-                break;
-            case DOWN:
-                if(!currentShape.moveByVector(0, -1)){
-                    putShape(currentShape);
-                }
-                else{
-                    addToScore(level);
-                }
-                lastFall = 0;
-                break;
-            case LEFT:
-                currentShape.moveByVector(-1, 0);
-                ghostShape = currentShape.getGhost();
-                break;
-            case RIGHT:
-                currentShape.moveByVector(1, 0);
-                ghostShape = currentShape.getGhost();
-                break;
-            case SPACE:
-                addToScore((currentShape.ldY - ghostShape.ldY) * 2 * level);
-                putShape(ghostShape);
-                break;
+                    else{
+                        addToScore(level);
+                    }
+                    lastFall = 0;
+                    break;
+                case LEFT:
+                    currentShape.moveByVector(-1, 0);
+                    ghostShape = currentShape.getGhost();
+                    break;
+                case RIGHT:
+                    currentShape.moveByVector(1, 0);
+                    ghostShape = currentShape.getGhost();
+                    break;
+                case SPACE:
+                    addToScore((currentShape.ldY - ghostShape.ldY) * 2 * level);
+                    putShape(ghostShape);
+                    break;
+                case P:
+                    animationTimer.stop();
+                    paused = !paused;
+                    gc.setFill(new Color(0,0,0,0.5));
+                    gc.fillRect(0,0, gc.getCanvas().getWidth(), gc.getCanvas().getHeight());
+
+                    gc.setFill(Color.WHITE);
+                    gc.setFont(Font.font("Arial Narrow", FontWeight.BOLD, 50));
+                    gc.fillText("PAUSE", gc.getCanvas().getWidth()/2 - 80, gc.getCanvas().getHeight()/2);
+
+                    player.pause();
+                    break;
+            }
+        }
+
+        // if game is paused
+        else if(!stop && key.getCode() == KeyCode.P) {
+            animationTimer.start();
+            paused = !paused;
+
+            player.play();
+        }
+
+        // if game over
+        if(stop && key.getCode() == KeyCode.R){
+            startGame();
+            player.play();
         }
     }
 
@@ -187,15 +229,30 @@ public class Play {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        animationTimer.stop();
+        paused = !paused;
+        gc.setFill(new Color(0,0,0,0.5));
+        gc.fillRect(0,0, gc.getCanvas().getWidth(), gc.getCanvas().getHeight());
+
+        gc.setFill(Color.WHITE);
+        gc.setFont(Font.font("Arial Narrow", FontWeight.BOLD, 50));
+        gc.fillText("GAME\nOVER", gc.getCanvas().getWidth()/2 - 80, gc.getCanvas().getHeight()/2);
+
+        player.pause();
     }
 
     void putShape(Shape shape){
+        try {
+            fall.stop();
+            fall.dispose();
+        }catch (Exception e){}
         fall = new MediaPlayer(fallMedia);
         fall.play();
 
         board.putShape(shape);
         if(shape.isAbove()){
-            startGame();
+            endGame();
+//            startGame();
             return;
         }
 
@@ -220,8 +277,11 @@ public class Play {
                 levelUp();
             }
 
+            try {
+                clearLineMP.stop();
+                clearLineMP.dispose();
+            }catch (Exception e){}
             clearLineMP = new MediaPlayer(clearLineMedia);
-            clearLineMP.setVolume(2);
             clearLineMP.play();
         }
         getNewShape();
@@ -294,6 +354,14 @@ public class Play {
     void goBack(ActionEvent event) {
         endGame();
         player.stop();
+        try {
+            fall.stop();
+            fall.dispose();
+        }catch (Exception e){}
+        try {
+            clearLineMP.stop();
+            clearLineMP.dispose();
+        }catch (Exception e){}
         replaceSceneContent("/FXML/MainMenu.fxml");
     }
 

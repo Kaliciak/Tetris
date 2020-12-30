@@ -18,7 +18,7 @@ public class OShape extends Shape {
         color = Color.rgb(249,250,26);
         blocks = new Block[3][3];
         ldX = 4;
-        ldY = 20;
+        ldY = 19;
     }
 
     public OShape(Board board, int state) {

@@ -7,4 +7,6 @@ left - move left\
 right - move right\
 down - soft drop\
 spacebar - hard drop\
-c - hold
+c - hold\
+p - pause\
+r - restart (if game is over)
