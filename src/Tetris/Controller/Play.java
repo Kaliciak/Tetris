@@ -19,11 +19,12 @@ import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.Scanner;
 
-import static Tetris.Controller.Global.replaceSceneContent;
-import static Tetris.Controller.Global.secondNano;
+import static Tetris.Controller.Global.*;
 import static Tetris.View.Show.*;
 
 
@@ -59,6 +60,11 @@ public class Play {
     long lockDelay = 0;
     long score = 0;
     int lines = 0;
+    long moved = 0;
+    boolean moveLeft = false;
+    boolean moveRight = false;
+    long movedLeft = 0;
+    long movedRight = 0;
 
     void startGame(){
         stop = false;
@@ -71,6 +77,11 @@ public class Play {
         lockDelay = 0;
         score = 0;
         lines = 0;
+        moved = 0;
+        moveLeft = false;
+        moveRight = false;
+        movedLeft = 0;
+        movedRight = 0;
 
         board = new Board();
         shapeGenerator = new ShapeGenerator(board);
@@ -108,6 +119,7 @@ public class Play {
                 };
                 animationTimer.start();
                 gc.getCanvas().getParent().addEventFilter(KeyEvent.KEY_PRESSED, this::keyPressed);
+                gc.getCanvas().getParent().addEventFilter(KeyEvent.KEY_RELEASED, this::keyReleased);
 
                 begun = true;
             }catch (Exception e){
@@ -145,9 +157,21 @@ public class Play {
             showNext(nextShape, nextGc);
             showNext(holdShape, holdGc);
         }
+
+        // moving left and right
+        if(!stop && !paused && moved > 0 && moveLeft && System.currentTimeMillis() - moved > secondMilli/5 && System.currentTimeMillis() - movedLeft > secondMilli/50) {
+            currentShape.moveByVector(-1, 0);
+            ghostShape = currentShape.getGhost();
+            movedLeft = System.currentTimeMillis();
+        }
+        if(!stop && !paused && moved > 0 && moveRight && System.currentTimeMillis() - moved > secondMilli/5 && System.currentTimeMillis() - movedRight > secondMilli/50) {
+            currentShape.moveByVector(1, 0);
+            ghostShape = currentShape.getGhost();
+            movedRight = System.currentTimeMillis();
+        }
     }
 
-    public void keyPressed(KeyEvent key){
+    void keyPressed(KeyEvent key){
         if(!paused){
             switch (key.getCode()){
                 case UP:
@@ -181,12 +205,22 @@ public class Play {
                     lastFall = 0;
                     break;
                 case LEFT:
-                    currentShape.moveByVector(-1, 0);
-                    ghostShape = currentShape.getGhost();
+                    if(moved == 0 && !moveLeft){
+                        currentShape.moveByVector(-1, 0);
+                        ghostShape = currentShape.getGhost();
+                        moved = System.currentTimeMillis();
+                        moveLeft = true;
+
+                    }
                     break;
                 case RIGHT:
-                    currentShape.moveByVector(1, 0);
-                    ghostShape = currentShape.getGhost();
+                    if(moved == 0 && !moveLeft){
+                        currentShape.moveByVector(1, 0);
+                        ghostShape = currentShape.getGhost();
+                        moved = System.currentTimeMillis();
+                        moveRight = true;
+
+                    }
                     break;
                 case SPACE:
                     addToScore((currentShape.ldY - ghostShape.ldY) * 2 * level);
@@ -222,6 +256,21 @@ public class Play {
         }
     }
 
+    void keyReleased(KeyEvent key){
+        switch(key.getCode()){
+            case LEFT:
+                moveLeft = false;
+                movedLeft = 0;
+                moved = 0;
+                break;
+            case RIGHT:
+                moveRight = false;
+                movedRight = 0;
+                moved = 0;
+                break;
+        }
+    }
+
     void endGame(){
         stop = true;
         try {
@@ -239,6 +288,27 @@ public class Play {
         gc.fillText("GAME\nOVER", gc.getCanvas().getWidth()/2 - 80, gc.getCanvas().getHeight()/2);
 
         player.pause();
+
+        // high score
+        try {
+            File highScoreFile = new File("Resources/HighScore");
+            if(highScoreFile.createNewFile()){
+                FileWriter fileWriter = new FileWriter("Resources/HighScore");
+                fileWriter.write(String.valueOf(score));
+                fileWriter.close();
+            }
+            else{
+                Scanner scanner = new Scanner(highScoreFile);
+                long prevScore = scanner.nextLong();
+                if(prevScore < score){
+                    FileWriter fileWriter = new FileWriter("Resources/HighScore");
+                    fileWriter.write(String.valueOf(score));
+                    fileWriter.close();
+                }
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     void putShape(Shape shape){

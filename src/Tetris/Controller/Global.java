@@ -11,6 +11,7 @@ import Tetris.Game;
 
 public class Global {
     public static final long secondNano = 1000000000;
+    public static final long secondMilli = 1000;
 
     public static Stage stage;
 
