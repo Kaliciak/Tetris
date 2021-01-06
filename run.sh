@@ -1,0 +1,1 @@
+java --module-path $PATH_TO_FX --add-modules=javafx.controls --add-modules=javafx.fxml --add-modules=javafx.media -cp out Tetris.Game

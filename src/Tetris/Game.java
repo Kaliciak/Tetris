@@ -8,6 +8,8 @@ import javafx.stage.Stage;
 
 import static Tetris.Controller.Global.stage;
 
+import java.sql.Time;
+
 public class Game extends Application {
     public static void main(String[] args) {
         launch(args);
@@ -15,13 +17,14 @@ public class Game extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception{
+        stage = primaryStage;
         Parent root = FXMLLoader.load(getClass().getResource("/FXML/MainMenu.fxml"));
         primaryStage.setTitle("Tetris");
-        primaryStage.setResizable(false);
+        primaryStage.setResizable(true);
         Scene scene = new Scene(root, 500, 650);
         primaryStage.setScene(scene);
         primaryStage.show();
-        stage = primaryStage;
         root.requestFocus();
+
     }
 }

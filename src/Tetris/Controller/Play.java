@@ -51,6 +51,8 @@ public class Play {
     boolean begun = false;
     boolean changed = false;
     boolean paused = false;
+    boolean muted = false;
+    boolean permMuted = false;
 
     AnimationTimer animationTimer;
 
@@ -238,6 +240,16 @@ public class Play {
 
                     player.pause();
                     break;
+                case M:
+                    if(!permMuted){
+                        if(!muted){
+                            player.pause();
+                        }
+                        else {
+                            player.play();
+                        }
+                        muted = !muted;
+                    }
             }
         }
 
@@ -252,7 +264,9 @@ public class Play {
         // if game over
         if(stop && key.getCode() == KeyCode.R){
             startGame();
-            player.play();
+            if (!muted){
+                player.play();  
+            }
         }
     }
 
@@ -287,7 +301,9 @@ public class Play {
         gc.setFont(Font.font("Arial Narrow", FontWeight.BOLD, 50));
         gc.fillText("GAME\nOVER", gc.getCanvas().getWidth()/2 - 80, gc.getCanvas().getHeight()/2);
 
-        player.pause();
+        if(!muted){
+            player.pause();
+        }
 
         // high score
         try {
@@ -312,12 +328,15 @@ public class Play {
     }
 
     void putShape(Shape shape){
-        try {
-            fall.stop();
-            fall.dispose();
-        }catch (Exception e){}
-        fall = new MediaPlayer(fallMedia);
-        fall.play();
+        if (!muted) {
+            try {
+                fall.stop();
+                fall.dispose();
+            }catch (Exception e){}
+            fall = new MediaPlayer(fallMedia);
+            fall.play();
+
+        }
 
         board.putShape(shape);
         if(shape.isAbove()){
@@ -347,12 +366,14 @@ public class Play {
                 levelUp();
             }
 
-            try {
-                clearLineMP.stop();
-                clearLineMP.dispose();
-            }catch (Exception e){}
-            clearLineMP = new MediaPlayer(clearLineMedia);
-            clearLineMP.play();
+            if(!muted){
+                try {
+                    clearLineMP.stop();
+                    clearLineMP.dispose();
+                }catch (Exception e){}
+                clearLineMP = new MediaPlayer(clearLineMedia);
+                clearLineMP.play();
+            }
         }
         getNewShape();
         lockDelay = 0;
@@ -423,15 +444,17 @@ public class Play {
     @FXML
     void goBack(ActionEvent event) {
         endGame();
-        player.stop();
-        try {
-            fall.stop();
-            fall.dispose();
-        }catch (Exception e){}
-        try {
-            clearLineMP.stop();
-            clearLineMP.dispose();
-        }catch (Exception e){}
+        if(!muted){
+            player.stop();
+            try {
+                fall.stop();
+                fall.dispose();
+            }catch (Exception e){}
+            try {
+                clearLineMP.stop();
+                clearLineMP.dispose();
+            }catch (Exception e){}
+        }
         replaceSceneContent("/FXML/MainMenu.fxml");
     }
 
@@ -448,12 +471,19 @@ public class Play {
         gameThread = new Thread(this::startGame);
         gameThread.start();
 
-        Media media = new Media(new File("Resources/Sound/Theme.mp3").toURI().toString());
-        player = new MediaPlayer(media);
-        player.setCycleCount(MediaPlayer.INDEFINITE);
-        player.play();
+        try {
+            Media media = new Media(new File("Resources/Sound/Theme.mp3").toURI().toString());
+            player = new MediaPlayer(media);
+            player.setCycleCount(MediaPlayer.INDEFINITE);
+            player.play();
 
-        fallMedia = new Media(new File("Resources/Sound/Fall.mp3").toURI().toString());
-        clearLineMedia = new Media(new File("Resources/Sound/ClearLine.mp3").toURI().toString());
+            fallMedia = new Media(new File("Resources/Sound/Fall.mp3").toURI().toString());
+            clearLineMedia = new Media(new File("Resources/Sound/ClearLine.mp3").toURI().toString());
+        }catch (Exception e){
+            permMuted = true;
+            muted = true;
+        }
+
+        stage.setResizable(false);
     }
 }
