@@ -61,7 +61,7 @@ public class MainMenu {
         }catch (Exception e){
             e.printStackTrace();
         }
-
+        Play.requestFocus();
         stage.setResizable(false);
     }
 }

@@ -8,8 +8,6 @@ import javafx.stage.Stage;
 
 import static Tetris.Controller.Global.stage;
 
-import java.sql.Time;
-
 public class Game extends Application {
     public static void main(String[] args) {
         launch(args);
@@ -24,7 +22,7 @@ public class Game extends Application {
         Scene scene = new Scene(root, 500, 650);
         primaryStage.setScene(scene);
         primaryStage.show();
-        root.requestFocus();
+//        root.requestFocus();
 
     }
 }
