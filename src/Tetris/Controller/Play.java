@@ -4,32 +4,39 @@ import Tetris.Model.Board;
 import Tetris.Model.Shape;
 import Tetris.Model.ShapeGenerator;
 import javafx.animation.AnimationTimer;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.StringExpression;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Button;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Region;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
-import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.net.URL;
-import java.util.ResourceBundle;
-import java.util.Scanner;
+import java.util.*;
 
 import static Tetris.Controller.Global.*;
 import static Tetris.View.Show.*;
 
 
 public class Play {
+    // resize variables
+    List<DoubleProperty> doublePropertyList = new ArrayList<>();
+    List<StringExpression> stringExpressionList = new ArrayList<>();
 
+    // game play variables
     Board board;
     ShapeGenerator shapeGenerator;
     Shape currentShape;
@@ -95,15 +102,14 @@ public class Play {
         scoreText.setText(String.valueOf(score));
         linesText.setText(String.valueOf(lines));
 
+        canvasText.setVisible(false);
+
         if(!begun){
             try {
                 animationTimer = new AnimationTimer() {
                     long lastTick = 0;
 
                     public void handle(long now) {
-                        if (stop) {
-                            return;
-                        }
                         if (lastTick == 0) {
                             long time = now - lastTick;
                             lastTick = now;
@@ -128,37 +134,39 @@ public class Play {
                 e.printStackTrace();
             }
         }
-        else{
-            animationTimer.start();
-        }
     }
 
     void tick(long time){
         boolean zero = true;
 
-        lastFall += time;
-        if(lastFall > speed){
-            if(!currentShape.moveByVector(0, -1)){
-                lockDelay += time;
-                if(lockDelay > secondNano/2){
-                    putShape(currentShape);
+        // dropping shape
+        if(!stop && !paused){
+            lastFall += time;
+            if(lastFall > speed){
+                if(!currentShape.moveByVector(0, -1)){
+                    lockDelay += time;
+                    if(lockDelay > secondNano/2){
+                        putShape(currentShape);
+                    }
+                    else{
+                        zero = false;
+                    }
                 }
-                else{
-                    zero = false;
+                if(zero){
+                    lastFall = 0;
                 }
-            }
-            if(zero){
-                lastFall = 0;
             }
         }
 
-        if(!stop){
-            showBoard(board, gc);
-            showGhost(ghostShape, gc);
-            showShape(currentShape, gc);
-            showNext(nextShape, nextGc);
-            showNext(holdShape, holdGc);
+        showBoard(board, gc);
+        showGhost(ghostShape, gc);
+        showShape(currentShape, gc);
+        showNext(nextShape, nextGc);
+        showNext(holdShape, holdGc);
+        if(paused){
+            darken(gc);
         }
+
 
         // moving left and right
         if(!stop && !paused && moved > 0 && moveLeft && System.currentTimeMillis() - moved > secondMilli/5 && System.currentTimeMillis() - movedLeft > secondMilli/50) {
@@ -229,14 +237,9 @@ public class Play {
                     putShape(ghostShape);
                     break;
                 case P:
-                    animationTimer.stop();
+                    canvasText.setText("PAUSE");
+                    canvasText.setVisible(true);
                     paused = !paused;
-                    gc.setFill(new Color(0,0,0,0.5));
-                    gc.fillRect(0,0, gc.getCanvas().getWidth(), gc.getCanvas().getHeight());
-
-                    gc.setFill(Color.WHITE);
-                    gc.setFont(Font.font("Arial Narrow", FontWeight.BOLD, 50));
-                    gc.fillText("PAUSE", gc.getCanvas().getWidth()/2 - 80, gc.getCanvas().getHeight()/2);
 
                     player.pause();
                     break;
@@ -255,8 +258,9 @@ public class Play {
 
         // if game is paused
         else if(!stop && key.getCode() == KeyCode.P) {
-            animationTimer.start();
+//            animationTimer.start();
             paused = !paused;
+            canvasText.setVisible(false);
 
             player.play();
         }
@@ -292,14 +296,9 @@ public class Play {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        animationTimer.stop();
         paused = !paused;
-        gc.setFill(new Color(0,0,0,0.5));
-        gc.fillRect(0,0, gc.getCanvas().getWidth(), gc.getCanvas().getHeight());
-
-        gc.setFill(Color.WHITE);
-        gc.setFont(Font.font("Arial Narrow", FontWeight.BOLD, 50));
-        gc.fillText("GAME\nOVER", gc.getCanvas().getWidth()/2 - 80, gc.getCanvas().getHeight()/2);
+        canvasText.setText("GAME\nOVER");
+        canvasText.setVisible(true);
 
         if(!muted){
             player.pause();
@@ -414,6 +413,57 @@ public class Play {
         linesText.setText(String.valueOf(lines));
     }
 
+    // resize functions
+    void setResize(double factor, List<? extends Node> list){
+        DoubleProperty fontSize = new SimpleDoubleProperty(10);
+        fontSize.bind(root.widthProperty().add(root.heightProperty()).divide(factor));
+        StringExpression binding = Bindings.concat("-fx-font-size: ", fontSize.asString(), ";");
+        doublePropertyList.add(fontSize);
+        stringExpressionList.add(binding);
+        for(Node node: list){
+            node.styleProperty().bind(binding);
+        }
+    }
+
+    void setPlace(Node node, double xFactor, double yFactor){
+        DoubleProperty xProperty = new SimpleDoubleProperty(10);
+        DoubleProperty yProperty = new SimpleDoubleProperty(10);
+        doublePropertyList.add(xProperty);
+        doublePropertyList.add(yProperty);
+
+        xProperty.bind(root.widthProperty().divide(xFactor));
+        yProperty.bind(root.heightProperty().divide(yFactor));
+
+        node.layoutXProperty().bindBidirectional(xProperty);
+        node.layoutYProperty().bindBidirectional(yProperty);
+    }
+
+    void setRegionSize(Region region, double widthFactor, double heightFactor){
+        DoubleProperty widthProperty = new SimpleDoubleProperty(10);
+        DoubleProperty heightProperty = new SimpleDoubleProperty(10);
+        doublePropertyList.add(widthProperty);
+        doublePropertyList.add(heightProperty);
+
+        widthProperty.bind(root.widthProperty().divide(widthFactor));
+        heightProperty.bind(root.heightProperty().divide(heightFactor));
+
+        region.prefWidthProperty().bind(widthProperty);
+        region.prefHeightProperty().bind(heightProperty);
+    }
+
+    void setCanvasSize(Canvas canvas, double widthFactor, double heightFactor){
+        DoubleProperty widthProperty = new SimpleDoubleProperty(10);
+        DoubleProperty heightProperty = new SimpleDoubleProperty(10);
+        doublePropertyList.add(widthProperty);
+        doublePropertyList.add(heightProperty);
+
+        widthProperty.bind(root.widthProperty().divide(widthFactor));
+        heightProperty.bind(root.heightProperty().divide(heightFactor));
+
+        canvas.widthProperty().bind(widthProperty);
+        canvas.heightProperty().bind(heightProperty);
+    }
+
     @FXML
     private ResourceBundle resources;
 
@@ -421,25 +471,46 @@ public class Play {
     private URL location;
 
     @FXML
-    private Button gb;
+    private AnchorPane root;
 
     @FXML
     private Canvas canvas;
 
     @FXML
-    private Canvas nextCanvas;
+    private Button gb;
 
     @FXML
-    private Canvas holdCanvas;
+    private Text scoreT;
 
     @FXML
     private Text scoreText;
 
     @FXML
+    private Text levelT;
+
+    @FXML
     private Text levelText;
 
     @FXML
+    private Canvas nextCanvas;
+
+    @FXML
+    private Text nextT;
+
+    @FXML
+    private Canvas holdCanvas;
+
+    @FXML
+    private Text holdT;
+
+    @FXML
+    private Text linesT;
+
+    @FXML
     private Text linesText;
+
+    @FXML
+    private Text canvasText;
 
     @FXML
     void goBack(ActionEvent event) {
@@ -484,6 +555,33 @@ public class Play {
             muted = true;
         }
 
-        stage.setResizable(false);
+        // resize
+        setResize(100, Collections.singletonList(gb));
+        setResize(55, Arrays.asList(nextT, holdT, scoreT, levelT, linesT, scoreText, levelText, linesText));
+        setResize(30, Collections.singletonList(canvasText));
+
+        setPlace(gb, 80, 80);
+        setRegionSize(gb, 5, 50);
+
+        setPlace(nextT, 25, (double)650/78);
+        setPlace(holdT, 25, (double)650/204);
+        setPlace(scoreT, 25, (double)650/334);
+        setPlace(scoreText, 25, (double)650/361);
+        setPlace(levelT, 25, (double)650/420);
+        setPlace(levelText, 25, (double)650/447);
+        setPlace(linesT, 25, (double)650/497);
+        setPlace(linesText, 25, (double)650/524);
+
+        setPlace(nextCanvas, 25, (double)650/92);
+        setCanvasSize(nextCanvas, (double)500/80, (double)650/80);
+        setPlace(holdCanvas, 25, (double)650/218);
+        setCanvasSize(holdCanvas, (double)500/80, (double)650/80);
+        setPlace(canvas, (double)500/180, (double)650/30);
+        setCanvasSize(canvas, (double)500/300, (double)650/600);
+
+        setPlace(canvasText, (double)500/180, (double)650/335);
+        canvasText.wrappingWidthProperty().bind(root.widthProperty().divide((double)500/300));
+
+//        stage.setResizable(false);
     }
 }

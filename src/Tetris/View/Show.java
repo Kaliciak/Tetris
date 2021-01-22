@@ -83,6 +83,9 @@ public class Show {
             for(int j = 0; j < 4; j ++){
                 try {
                     Block block = shape.blocks[i][j];
+                    if(block.empty){
+                        continue;
+                    }
                     gc.drawImage(blockImage,i * width, gc.getCanvas().getHeight() - (j + 1) * height, width - 1, height - 1);
                     gc.setFill(block.color);
                     BlendMode prev = gc.getGlobalBlendMode();
@@ -94,5 +97,10 @@ public class Show {
                 }
             }
         }
+    }
+
+    public static void darken(GraphicsContext gc){
+        gc.setFill(new Color(0,0,0,0.5));
+        gc.fillRect(0,0, gc.getCanvas().getWidth(), gc.getCanvas().getHeight());
     }
 }

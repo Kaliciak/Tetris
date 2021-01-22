@@ -12,6 +12,7 @@ import Tetris.Game;
 public class Global {
     public static final long secondNano = 1000000000;
     public static final long secondMilli = 1000;
+    public static final double ratio = (double)10/13; // width/height
 
     public static Stage stage;
 
@@ -21,7 +22,7 @@ public class Global {
             Parent page = (Parent) FXMLLoader.load(Game.class.getResource(fxml), null, new JavaFXBuilderFactory());
             Scene scene = stage.getScene();
             stage.getScene().setRoot(page);
-            stage.sizeToScene();
+//            stage.sizeToScene();
             if(fxml.equals("/FXML/Play.fxml")){
                 page.requestFocus();
             }
